@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>__PRESENTATION_TITLE__</title>
+
+  <link rel="stylesheet" href="reveal/dist/reset.css">
+  <link rel="stylesheet" href="reveal/dist/reveal.css">
+  <link rel="stylesheet" href="reveal/plugin/highlight/monokai.css">
+  <!-- after reveal.css, so the TUD theme wins -->
+  <link rel="stylesheet" href="theme/tud-dark.css">
+</head>
+
+<body>
+<div class="reveal">
+<div class="slides">
+
+  <!-- ===================================================== title ======= -->
+  <section class="title-slide">
+    <h1>__PRESENTATION_TITLE__</h1>
+    <div class="authors">
+      <div class="author-block">
+        <p class="author">Paul Dräger</p>
+        <p class="email">paul.draeger@tu-dresden.de</p>
+      </div>
+      <!-- one .author-block per author; they lay out as columns -->
+    </div>
+    <p class="affiliation">
+      Institute of Fluid Mechanics · Chair of Fluid Mechanics<br>
+      TUD Dresden University of Technology
+    </p>
+    <p class="occasion">__PRESENTATION_DATE__</p>
+  </section>
+
+  <!-- ===================================================== content ===== -->
+  <section>
+    <h2>First slide</h2>
+    <ul>
+      <li>A symbol known to <code>lib/shared_data.js</code> is written as its own
+        command inside maths — <code>\(\density\)</code> gives \(\density\) and
+        adds it to the nomenclature at the back.</li>
+      <li>A reference known to <code>lib/shared_data.js</code> is written
+        <code>[@key]</code> and comes out numbered, with the entry on the
+        bibliography slide.</li>
+    </ul>
+    <aside class="notes">
+      Speaker notes live here and show up in the speaker view (press S).
+    </aside>
+  </section>
+
+  <!-- ===================================================== back matter = -->
+  <!-- Filled by tud-slides.js from what the slides above actually used. -->
+  <section data-generate="nomenclature"></section>
+  <section data-generate="bibliography"></section>
+
+</div>
+</div>
+
+<script src="reveal/dist/reveal.js"></script>
+<script src="reveal/plugin/notes/notes.js"></script>
+<script src="reveal/plugin/markdown/markdown.js"></script>
+<script src="reveal/plugin/highlight/highlight.js"></script>
+<script src="reveal/plugin/search/search.js"></script>
+<script src="reveal/plugin/zoom/zoom.js"></script>
+<script src="reveal/plugin/math/math.js"></script>
+<script src="lib/shared_data.js"></script>
+<script src="lib/tud-slides.js"></script>
+
+<script>
+  TUD.init({
+    language: 'en',         // 'de' switches the wordmark for a German talk
+    assets: '.'              // this deck sits beside theme/, lib/ and reveal/
+  });
+</script>
+</body>
+</html>

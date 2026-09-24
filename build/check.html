@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deck check</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 24px 32px;
+    background: #000; color: #e7e9ed;
+    font: 14px/1.5 'Noto Sans', system-ui, sans-serif;
+  }
+  h1 { font-size: 18px; font-weight: 500; margin: 0 0 2px; }
+  .deck { color: #7d8894; font-size: 12px; margin-bottom: 18px; word-break: break-all; }
+  h2 { font-size: 13px; font-weight: 600; color: #97c6ff; margin: 18px 0 6px;
+       text-transform: uppercase; letter-spacing: 0.06em; }
+  .verdict { font-size: 15px; font-weight: 600; padding: 8px 12px; border-left: 3px solid; }
+  .verdict.pass { border-color: #8ce6aa; color: #8ce6aa; }
+  .verdict.fail { border-color: #ffbe78; color: #ffbe78; }
+  ul { margin: 0; padding-left: 18px; }
+  li { margin-bottom: 3px; }
+  li.ok   { color: #7d8894; list-style: none; margin-left: -18px; }
+  li.warn { color: #ffbe78; }
+  li.bad  { color: #ffaaa5; }
+  code { color: #8ce6d7; font-family: 'DejaVu Sans Mono', monospace; }
+  iframe { position: fixed; left: -3000px; top: 0; width: 1280px; height: 720px; border: 0; }
+</style>
+</head>
+<body>
+
+<h1>Deck check</h1>
+<div class="deck" id="deck-name">…</div>
+<div id="verdict" class="verdict">running…</div>
+<div id="report"></div>
+<iframe id="stage"></iframe>
+
+<script>
+/* ---------------------------------------------------------------------------
+ * A deck is a web page, so the only honest way to check it is to load it and
+ * look. This page does that in an off-screen iframe and reports what a person
+ * would otherwise have to click through twenty slides to notice:
+ *
+ *   - content that runs past the bottom of its slide,
+ *   - maths that MathJax could not render (a command from a LaTeX package the
+ *     browser has never heard of comes out as red error text),
+ *   - citations pointing at keys that are not in literatur.bib,
+ *   - back matter that stayed empty,
+ *   - and, as a sweep, every symbol in variables.tex typeset at once, so a
+ *     broken formula is found before a deck happens to use it.
+ *
+ * Open it with the deck as a query parameter:
+ *
+ *   http://127.0.0.1:8000/S00_main/build/check.html?deck=/S01_cosmic_kick_off/versions/S01_v1_2026-08-26.html
+ *
+ * It is a page rather than a script because it needs a browser to be right,
+ * and because the answer is then legible in the same place the deck is.
+ * ------------------------------------------------------------------------ */
+
+const params = new URLSearchParams(location.search);
+const deck = params.get('deck');
+const report = document.getElementById('report');
+const verdict = document.getElementById('verdict');
+document.getElementById('deck-name').textContent = deck || '(no ?deck= given)';
+
+let problems = 0;
+
+function section(title, items) {
+  const h = document.createElement('h2');
+  h.textContent = title;
+  report.appendChild(h);
+  const ul = document.createElement('ul');
+  if (!items.length) items = [{ level: 'ok', text: 'nothing to report' }];
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = item.level;
+    li.innerHTML = item.text;
+    if (item.level !== 'ok') problems++;
+    ul.appendChild(li);
+  });
+  report.appendChild(ul);
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function label(section, index) {
+  const heading = section.querySelector('h1, h2, h3');
+  const text = heading ? heading.textContent.trim() : '(untitled)';
+  return `slide ${index + 1} — ${text.slice(0, 60)}`;
+}
+
+async function run() {
+  if (!deck) {
+    verdict.className = 'verdict fail';
+    verdict.textContent = 'no ?deck= parameter';
+    return;
+  }
+
+  const frame = document.getElementById('stage');
+  await new Promise(resolve => { frame.onload = resolve; frame.src = deck; });
+
+  const win = frame.contentWindow;
+  const doc = frame.contentDocument;
+
+  if (!win.Reveal) {
+    verdict.className = 'verdict fail';
+    verdict.textContent = 'the deck did not initialise Reveal';
+    return;
+  }
+  if (!win.Reveal.isReady()) {
+    await new Promise(resolve => win.Reveal.on('ready', resolve));
+  }
+  if (win.MathJax && win.MathJax.startup) await win.MathJax.startup.promise;
+  await sleep(400);
+
+  const slides = Array.from(doc.querySelectorAll('.reveal .slides section'))
+    .filter(s => !s.querySelector('section'));
+
+  /* --- overflow ---------------------------------------------------------
+     Each slide is walked through in turn, because reveal hides the ones that
+     are not on screen and a hidden element has no geometry to measure. */
+  const overflow = [];
+  for (let i = 0; i < slides.length; i++) {
+    win.Reveal.slide(i);
+    await sleep(60);
+    const s = slides[i];
+    const box = s.getBoundingClientRect();
+    // The slide number marks the bottom of the type area. Measuring it rather
+    // than assuming a height keeps this honest when the margins change.
+    const footer = s.querySelector('.tud-footer');
+    const limit = footer ? footer.getBoundingClientRect().top : box.bottom;
+    let lowest = box.top;
+    Array.from(s.children).forEach(child => {
+      if (child.classList.contains('tud-footer')) return;
+      if (child.classList.contains('title-logos')) return;
+      if (child.tagName === 'ASIDE') return;
+      const r = child.getBoundingClientRect();
+      if (r.height > 0) lowest = Math.max(lowest, r.bottom);
+    });
+    const over = Math.round(lowest - limit);
+    if (over > 2) {
+      overflow.push({ level: over > 24 ? 'bad' : 'warn',
+                      text: `${label(s, i)} — overruns the footer by ${over} px` });
+    }
+  }
+  win.Reveal.slide(0);
+  section(`Overflow (${slides.length} slides)`, overflow);
+
+  /* --- maths in the deck ------------------------------------------------ */
+  const mathErrors = [];
+  slides.forEach((s, i) => {
+    const broken = s.querySelectorAll('[data-mml-node="merror"]');
+    if (broken.length) {
+      const names = Array.from(broken).map(n => n.textContent.trim()).join(', ');
+      mathErrors.push({ level: 'bad', text: `${label(s, i)} — <code>${names}</code>` });
+    }
+  });
+  section('Maths on the slides', mathErrors);
+
+  /* --- citations and back matter ---------------------------------------- */
+  const refs = [];
+  const unresolved = Array.from(doc.querySelectorAll('.reveal .slides cite'))
+    .filter(c => c.textContent.includes('?'));
+  unresolved.forEach(c => refs.push({
+    level: 'bad', text: `citation not in literatur.bib: <code>${c.getAttribute('data-key')}</code>` }));
+
+  const leftovers = [];
+  slides.forEach((s, i) => {
+    if (s.hasAttribute('data-generate')) return;
+    // A slide that talks about \density shows it inside <code> on purpose.
+    const copy = s.cloneNode(true);
+    copy.querySelectorAll('code, pre').forEach(n => n.remove());
+    const text = copy.textContent || '';
+    const m = text.match(/\\[A-Za-z]{2,}/g);
+    if (m) leftovers.push({ level: 'warn',
+      text: `${label(s, i)} — unexpanded command in the rendered text: <code>${[...new Set(m)].join(' ')}</code>` });
+  });
+  refs.push(...leftovers);
+
+  doc.querySelectorAll('.reveal .slides section[data-generate]').forEach(s => {
+    const kind = s.getAttribute('data-generate');
+    const rows = kind === 'nomenclature'
+      ? s.querySelectorAll('table.nomenclature tr').length
+      : s.querySelectorAll('ol.bibliography li').length;
+    refs.push(rows
+      ? { level: 'ok', text: `${kind}: ${rows} entries` }
+      : { level: 'warn', text: `${kind} slide is empty` });
+  });
+  section('Citations and back matter', refs);
+
+  /* --- every symbol in variables.tex, not just the ones this deck uses --- */
+  const symbolProblems = [];
+  const shared = win.TUD_SHARED;
+  if (!shared) {
+    symbolProblems.push({ level: 'bad', text: 'shared_data.js was not loaded by the deck' });
+  } else if (win.MathJax && win.MathJax.typesetPromise) {
+    const sweep = doc.createElement('div');
+    sweep.style.cssText = 'position:absolute;left:-9999px;top:0;width:900px';
+    Object.keys(shared.symbols).forEach(key => {
+      const symbol = shared.symbols[key];
+      const row = doc.createElement('div');
+      row.setAttribute('data-symbol', key);
+      row.innerHTML = '\\(' + symbol.formula + '\\)' + (symbol.unitHTML || '');
+      sweep.appendChild(row);
+    });
+    doc.body.appendChild(sweep);
+    await win.MathJax.typesetPromise([sweep]);
+    sweep.querySelectorAll('[data-symbol]').forEach(row => {
+      const broken = row.querySelectorAll('[data-mml-node="merror"]');
+      if (broken.length) {
+        symbolProblems.push({ level: 'bad',
+          text: `<code>${row.getAttribute('data-symbol')}</code> — ` +
+                Array.from(broken).map(n => n.textContent.trim()).join(', ') });
+      }
+    });
+    sweep.remove();
+    symbolProblems.push({ level: 'ok',
+      text: `${Object.keys(shared.symbols).length} symbols and ` +
+            `${Object.keys(shared.bib).length} references typeset` });
+  }
+  section('All symbols in variables.tex', symbolProblems);
+
+  verdict.className = problems ? 'verdict fail' : 'verdict pass';
+  verdict.textContent = problems
+    ? `${problems} thing${problems === 1 ? '' : 's'} to look at`
+    : 'clean';
+}
+
+run().catch(error => {
+  verdict.className = 'verdict fail';
+  verdict.textContent = 'the check itself failed: ' + error;
+  console.error(error);
+});
+</script>
+</body>
+</html>

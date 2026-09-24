@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>Stil</title>
+
+  <link rel="stylesheet" href="reveal/dist/reset.css">
+  <link rel="stylesheet" href="reveal/dist/reveal.css">
+  <link rel="stylesheet" href="reveal/plugin/highlight/monokai.css">
+  <!-- nach reveal.css, damit das TUD-Theme gewinnt -->
+  <link rel="stylesheet" href="theme/tud-dark.css">
+
+  <style>
+    /* ---------------------------------------------------------------------
+     * Nur was diese vier Folien selbst brauchen. Alles, was eine Aussage
+     * ueber den Stil macht, steht im Theme -- hier steht die Vitrine, nicht
+     * das Ausgestellte.
+     * ------------------------------------------------------------------ */
+
+    /* --- Schrift und Farbe ---------------------------------------- */
+    /* Der Kern dieses Foliensatzes: er zeigt, womit jeder andere gesetzt ist.
+       Die Folie kam aus S02, wo sie als Anhang hinter dem Literaturverzeichnis
+       stand -- am falschen Ort, denn sie sagt nichts ueber jenen Vortrag,
+       sondern etwas ueber alle. Jede Zeile
+       traegt ihre eigene Groesse und ihre eigene Farbe -- der Wert wird also
+       vorgefuehrt und nicht behauptet. Die Farbtupfen greifen auf dieselben
+       Variablen zu wie die Folien; wer eine Rolle im Theme umstellt, sieht es
+       hier, ohne dass jemand etwas nachtragen muesste.
+
+       Die Staffel ist jetzt gesetzt, die frueher hier stehende Warnung damit
+       erledigt: die Proben tragen dieselben Pixelwerte, die das Stylesheet
+       vergibt. Sie sind weiter in Punkten ausgezeichnet und nicht in em --
+       ein em haengt davon ab, worin die Zeile steht, ein Pixelwert nicht,
+       und die Staffel wird in Pixeln vergeben. */
+    .reveal .muster {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      column-gap: 2em;
+      margin-top: 0.2em;
+    }
+    /* Seit Schrift und Farbe eigene Folien haben, steht je eine Haelfte
+       allein. Ueber die ganze Breite gezogen risse zwischen der Probe links
+       und ihrem Wert rechts ein Streifen Leere auf, den niemand ueberspringen
+       will -- die Spalte behaelt deshalb ihr Mass und steht links. */
+    .reveal .muster.einspaltig {
+      grid-template-columns: minmax(0, max-content);
+      margin-top: 0.4em;
+    }
+    /* Die Schriftproben brauchen einen engeren Kasten als die Farbzeilen: ihre
+       Woerter sind kurz ("klein", "Titel"), der Wert steht rechtsbuendig, und
+       ueber die volle Breite laegen zwischen beiden fuenfhundert Punkte Leere.
+       26 em ist das Mass, das die Spalte hatte, als Schrift und Farbe sich
+       eine Folie teilten. */
+    /* 36 em, nicht mehr 26: die Wertspalte nennt jetzt die Rollen jeder Stufe
+       aus, und "Absatz, Liste, Tabelle, Formel, Achsenbeschriftung" passt in
+       26 em nicht neben die Probe -- sie schob sich darueber. */
+    .reveal .muster.einspaltig .groessen { width: 40em; }
+    /* Die Ueberschrift der Spalte sagte, welche der beiden es ist. Jetzt sagt
+       das der Folientitel. */
+    .reveal .muster.einspaltig h3 { display: none; }
+    .reveal .muster h3 {
+      font-size: var(--tud-fs-klein);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--tud-fg-muted);
+      border: 0;
+      margin: 0 0 0.9em;
+    }
+    .reveal .muster .zeile {
+      display: grid;
+      align-items: baseline;
+      column-gap: 0.9em;
+      margin-bottom: 3px;
+    }
+    .reveal .muster.einspaltig .farben .zeile { margin-bottom: 5px; }
+    /* Probe links, Wert rechts daneben -- nicht am rechten Rand. Rechts-
+       buendig riss zwischen "klein" und seinem Wert eine Rinne auf, und weil
+       die Proben von 60 auf 18 px schrumpfen, war die Rinne in jeder Zeile
+       anders breit. Die Spalte ist so breit wie die laengste Probe. */
+    .reveal .groessen .zeile {
+      grid-template-columns: 11.5em 1fr;
+      column-gap: 2em;
+      /* 7 statt 10 px: seit die Werte im Mathesatz stehen, bringt jede Zeile
+         die groessere Zeilenhoehe einer Formel mit. */
+      margin-bottom: 7px;
+    }
+    /* Der Zahlenwert in Grau 10 wie der Fliesstext, die Rolle daneben in
+       Grau 40 wie jede Nebenangabe -- die Farben, die die Tabelle zwei Folien
+       weiter dafuer vergibt. Tabellenziffern, damit die Zahlen untereinander
+       stehen. */
+    .reveal .groessen .px {
+      display: inline-block;
+      width: 3.6em;
+      color: var(--tud-fg);
+      font-variant-numeric: tabular-nums;
+    }
+    .reveal .groessen .probe { line-height: 1.06; white-space: nowrap; }
+    .reveal .muster .wert { font-size: var(--tud-fs-klein); color: var(--tud-fg-muted); }
+
+    /* Die Farbspalte: Tupfen, Rollenname, Hexwert, Verwendung. Der Tupfen ist
+       ein Rechteck und kein Kreis -- er soll die Flaeche zeigen, in der die
+       Farbe auf den Folien vorkommt, und nicht ein Aufzaehlungszeichen sein. */
+    .reveal .farben .zeile {
+      grid-template-columns: 30px 6em 6em 13em 1fr;
+      align-items: center;
+      column-gap: 0.7em;
+      font-size: var(--tud-fs-klein);
+      margin-bottom: 7px;
+    }
+    .reveal .farben .tupfen { height: 16px; border-radius: 2px; }
+    .reveal .farben code { color: var(--tud-fg); }
+    /* Der Rollenname ist ein Rasterfeld; ohne das hier zoege sein Kaestchen
+       auf die volle Spaltenbreite und saehe aus wie ein Eingabefeld. */
+    .reveal .farben .zeile > code { justify-self: start; }
+    .reveal .farben .cd { color: var(--tud-fg); white-space: nowrap; }
+    .reveal .farben .hex {
+      font-family: 'DejaVu Sans Mono', 'Noto Sans Mono', ui-monospace, monospace;
+      color: var(--tud-fg-muted);
+    }
+    /* Die Verwendung steht links an einer gemeinsamen Kante und nicht rechts
+       am Rand: rechtsbuendig riss sie einen Streifen Leere zwischen Hexwert
+       und Erklaerung auf, und die beiden gehoeren zusammen. */
+    .reveal .farben .wo  { color: var(--tud-fg-muted); }
+
+    /* --- Bild und Video --------------------------------------------------- */
+    /* Der Kasten nimmt, was unter dem Folientitel bleibt: .fill-grid ist eine
+       Flex-Spalte, deren uebrige Kinder `flex: 0 0 auto` tragen. Der Rahmen
+       liegt dank border-box innerhalb; ohne das waere die Haelfte seiner
+       Staerke ueber den Rand hinaus und der Kasten mitsamt Beweis sechs
+       Punkte zu gross. */
+    .reveal .fill-grid > .massflaeche { flex: 1 1 auto; min-height: 0; }
+    .reveal .massflaeche {
+      box-sizing: border-box;
+      /* Rahmen in Grau 40 und 2 px, also L2. Keine Fuellung: Grau 100 hat
+         seit der Neuordnung keine Aufgabe mehr, und eine Flaeche, die der
+         Stil nicht kennt, hat auf der Stilfolie nichts zu suchen. */
+      border: 2px solid var(--tud-l2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    /* Keine eigene Groesse: die Zahl ist ein Absatz und steht damit auf dem
+       Fliesstext der Staffel. Sie hatte die Titelstufe -- 60 px --, und das
+       war sie nie: ein Titel steht ueber etwas, diese Zahl steht in etwas.
+       Was sie heraushebt, ist die Farbe und dass sie allein in einem leeren
+       Kasten steht, nicht ihre Groesse. */
+    .reveal .massflaeche .gross {
+      color: var(--tud-fg-strong);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      margin: 0 0 0.3em;
+      line-height: 1;
+    }
+    .reveal .massflaeche .wo {
+      font-size: var(--tud-fs-klein);
+      line-height: 1.4;
+      margin: 0;
+      max-width: 30em;
+    }
+
+    /* --- die Beispieltabelle ---------------------------------------------- */
+    /* Nur Spaltenbreiten und der Farbtupfen. Alles, was die Tabelle aussagt --
+       Kopfzeile, Zeilenlinien, Tabellenziffern --, kommt aus dem Theme und
+       wird hier vorgefuehrt, nicht nachgebaut. */
+    /* Die Tabelle nimmt die Breite ihres Inhalts, nicht die des Satzspiegels.
+       Ueber die volle Breite gezogen standen zwischen "reveal.js" und "5.2.1"
+       vierhundert Punkte Leere, und das Auge musste jede Zeile abschreiten,
+       statt sie zu lesen. `width: auto` schlaegt die 100 % des Themes.
+
+       Der Abstand kommt jetzt aus dem Zellenrand und nicht aus der
+       Spaltenbreite -- 1,4 em rechts, damit die Spalten sich nicht beruehren. */
+    /* Mittig und nicht linksbuendig: die Tabelle ist schmaler als der
+       Satzspiegel, und an den linken Rand gesetzt haenge sie an einer Kante,
+       die sonst nichts auf der Folie benutzt. Die Fussnote darunter nimmt die
+       Mitte mit, damit beides ein Block bleibt. */
+    .reveal table.grautabelle {
+      table-layout: auto;
+      width: auto;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .reveal table.grautabelle th,
+    .reveal table.grautabelle td { padding: 0.28em 1.4em 0.28em 0; }
+    .reveal table.grautabelle th:last-child,
+    .reveal table.grautabelle td:last-child { padding-right: 0; }
+    /* Der Hexwert in der Festbreitenschrift, aber ohne den Kasten, den <code>
+       mitbringt: in jeder Zeile einer, und die Tabelle waere ein Feld aus
+       Kaestchen statt einer Tabelle. */
+    .reveal table.grautabelle .hex {
+      font-family: 'DejaVu Sans Mono', 'Noto Sans Mono', ui-monospace, monospace;
+      color: var(--tud-fg-muted);
+      white-space: nowrap;
+    }
+    .reveal table.grautabelle .tupfen {
+      display: block;
+      height: 16px;
+      border-radius: 2px;
+      /* Weiss auf fast Schwarz braucht keine Kante, #323f4b schon: ohne sie
+         verschwaende der dunkelste Tupfen im Grund und die Zeile zeigte
+         nichts. */
+      border: 1px solid var(--tud-l1);
+    }
+
+    /* --- Stichpunkte ------------------------------------------------------ */
+    .reveal .listen { display: grid; grid-template-columns: 1fr 1fr; column-gap: 2.4em; }
+    .reveal .listen ul, .reveal .listen ol { margin: 0; }
+    .reveal .listen ul ul { margin-top: 0.35em; }
+
+    /* --- Strichstaerken --------------------------------------------------- */
+    /* Jede Zeile zieht ihren Strich in der Staerke, die sie nennt. Wie bei den
+       Schriftgroessen gilt: vorfuehren, nicht behaupten. Die Staerke steht als
+       Zahl daneben, weil ein Strich von 1,2 und einer von 1,6 nebeneinander
+       zwar verschieden aussehen, aber niemand ihnen ansieht, welcher welcher
+       ist. */
+    .reveal .striche { display: grid; row-gap: 11px; margin-top: 0.3em; }
+    .reveal .striche .zeile {
+      display: grid;
+      grid-template-columns: 250px 105px 1fr;
+      align-items: baseline;
+      column-gap: 1.1em;
+    }
+    /* Die Probe ist ein Strich ohne eigene Grundlinie; dieser Versatz setzt
+       sie auf die Mitte der ersten Textzeile daneben. */
+    .reveal .striche .probe { position: relative; top: -0.42em; }
+    .reveal .striche .probe { height: 1px; }
+    .reveal .striche .mass {
+      font-size: var(--tud-fs-klein);
+      color: var(--tud-fg-muted);
+      /* Der Name hell, das Mass grau: gemeint ist im Gespraech der Name, die
+         Zahl steht daneben, damit man ihn nachschlagen kann. */
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .reveal .striche .wo {
+      font-size: var(--tud-fs-klein);
+      line-height: 1.4;
+      max-width: 30em;
+    }
+    .reveal .striche .wo b { color: var(--tud-fg-strong); font-weight: 600; }
+    .reveal .striche .mass b { color: var(--tud-fg); font-weight: 600; }
+    .reveal .striche .rest {
+      margin-top: 1.1em;
+      font-size: var(--tud-fs-klein);
+      color: var(--tud-fg-muted);
+      max-width: 40em;
+    }
+
+    /* --- Pfeile ----------------------------------------------------------- */
+    /* Zwei Sorten, und der Unterschied ist nicht die Groesse, sondern das
+       Verhaeltnis von Strich zu Kopf. Beide Zeichnungen stehen in einem svg,
+       dessen viewBox 1:1 auf Folieneinheiten abgebildet ist -- was hier als
+       stroke-width steht, ist die Staerke auf der Folie. */
+    .reveal .pfeile {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      column-gap: 1.6em;
+      margin-top: 1em;
+    }
+    /* `> div > svg` und nicht `svg`: MathJax zeichnet seine Formeln ebenfalls
+       als svg, und mit `width: 100%` blies diese Regel eine Inline-Formel in
+       der Bildunterschrift auf Panelbreite auf -- 353 mal 1011 Punkte, die
+       Folie war fuenfmal so hoch wie der Satzspiegel. Der Kindselektor trifft
+       nur die drei gezeichneten Pfeile. */
+    .reveal .pfeile > div > svg { display: block; width: 100%; height: auto; }
+    .reveal .pfeile p {
+      font-size: var(--tud-fs-klein);
+      color: var(--tud-fg-muted);
+      margin: 0.5em 0 0;
+      max-width: 26em;
+    }
+    .reveal .pfeile .zahl { color: var(--tud-fg); font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ================================================== 1 — Titel ========= -->
+<section class="title-slide">
+  <h1>Stil</h1>
+  <div class="authors">
+    <div class="author-block">
+      <p class="author">Paul Dräger</p>
+      <p class="email">paul.draeger@tu-dresden.de</p>
+    </div>
+  </div>
+  <p class="event">16.09.2026</p>
+  <p class="affiliation">
+    Institut für Strömungsmechanik · Professur für Strömungsmechanik<br>
+    Technische Universität Dresden
+  </p>
+</section>
+
+<!-- ======================================== 2 — Inhaltsverzeichnis ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Inhaltsverzeichnis</h2>
+
+  <ol class="agenda">
+    <li>Schrift</li>
+    <li>Stichpunkte</li>
+    <li>Formeln</li>
+    <li>Strichdicke und Pfeile</li>
+    <li>Farben</li>
+    <li>Tabelle</li>
+    <li>Bild und Video</li>
+  </ol>
+
+  <aside class="notes">
+    Die einzige Liste auf der 27er Stufe. Zentriert wird der Block und nicht
+    die Zeile -- die Punkte bleiben linksbuendig, damit die Nummern
+    untereinander stehen.
+
+    Keine Unterpunkte: was hier nicht in eine Zeile passt, gehoert nicht in
+    die Uebersicht.
+  </aside>
+</section>
+
+<!-- ==================================================== 3 — Schrift ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Schrift</h2>
+  <div class="muster einspaltig">
+  <div class="groessen">
+    <h3>Schriftgrößen</h3>
+    <div class="zeile"><span class="probe" style="font-size:60px; color:var(--tud-accent)">Titel</span>
+      <span class="wert"><span class="px">\(60\,\mathrm{px}\)</span><code>h1</code> der Titelfolie</span></div>
+    <div class="zeile"><span class="probe" style="font-size:36px; font-weight:500; color:var(--tud-fg-strong)">Folientitel</span>
+      <span class="wert"><span class="px">\(36\,\mathrm{px}\)</span><code>h2</code></span></div>
+    <div class="zeile"><span class="probe" style="font-size:27px; font-weight:600; letter-spacing:0.04em; color:var(--tud-fg-muted)">THEMA</span>
+      <span class="wert"><span class="px">\(27\,\mathrm{px}\)</span>über dem Folientitel</span></div>
+    <div class="zeile"><span class="probe" style="font-size:27px">Inhaltsverzeichnis</span>
+      <span class="wert"><span class="px">\(27\,\mathrm{px}\)</span><code>.agenda</code></span></div>
+    <div class="zeile"><span class="probe" style="font-size:24px">Fließtext</span>
+      <span class="wert"><span class="px">\(24\,\mathrm{px}\)</span>Absatz, Liste, Tabelle, Formel, Achsenbeschriftung</span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px; font-style:italic; color:var(--tud-fg-muted)">Bildunterschrift</span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span><code>figcaption</code></span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px">Skizze</span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span>Beschriftung in einer Zeichnung</span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px">Zitat <span class="cite autor">[Beispiel et al., 2026]</span></span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span><code>.cite</code></span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px; color:var(--tud-fg-muted)">Formelnummer</span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span>rechts neben der Formel</span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px"><code>Code</code></span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span>Festbreite, Türkis 2</span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px">Seitenzahl</span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span><code>.tud-footer</code></span></div>
+    <div class="zeile"><span class="probe" style="font-size:20px; color:var(--tud-fg-muted)">Achsen-Ticks</span>
+      <span class="wert"><span class="px">\(20\,\mathrm{px}\)</span>nur in Plots, von matplotlib gesetzt</span></div>
+  </div>
+  </div>
+</section>
+
+
+<!-- =============================================== 4 — Stichpunkte ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Stichpunkte</h2>
+
+  <div class="listen">
+    <div>
+      <p class="spaltentitel">Aufzählung</p>
+      <ul>
+        <li>Ein Punkt trägt ein volles Quadrat in Blau 2, etwas über der
+          Grundlinie</li>
+        <li>Die zweite Ebene trägt dasselbe Quadrat hohl, in Grau 60 — dem Ton
+          von L1
+          <ul>
+            <li>Sie rückt ein und wird nicht kleiner</li>
+            <li>Eine dritte Ebene gibt es nicht</li>
+          </ul></li>
+      </ul>
+    </div>
+
+    <div>
+      <p class="spaltentitel">Nummeriert</p>
+      <ol>
+        <li>Die Nummer steht in Blau 2, der Text in Grau 10</li>
+        <li>Genommen, wo die Reihenfolge etwas bedeutet — ein Ablauf, eine
+          Rangfolge</li>
+        <li>Sonst die Aufzählung: eine Nummer, die nichts nummeriert, liest
+          sich als Versprechen auf einen Bezug, den es nicht gibt</li>
+      </ol>
+    </div>
+  </div>
+
+  <p class="fussnote">Beide stehen auf dem Grundwert, wie der Absatz daneben
+    — eine eigene Listenstufe gibt es nicht. Verschachtelt bleibt die Liste
+    gleich groß: den Rang trägt der Einzug, nicht die Größe.</p>
+</section>
+
+<!-- ==================================================== 5 — Formeln ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Formeln</h2>
+
+  <p>Eine abgesetzte Formel steht auf dem Grundwert, ihre Nummer rechts daneben:</p>
+
+  <div class="eq">
+    <p>\[ \bm{F} = \int_{\Omega}
+         \left( -\nabla p \;+\; \sigma\,\kappa\,\delta_\Gamma\,\bm{n} \right)
+         \mathrm{d}V \]</p>
+    <p class="muted">(5.1)</p>
+  </div>
+
+  <p>Im Satz steht eine Größe wie \(\sigma\) oder \(\bm{n}\) mitten in der
+    Zeile und ändert deren Höhe nicht.</p>
+
+  <p class="fussnote">Gesetzt in STIX&nbsp;Two&nbsp;Math, der Matheschrift des
+    PEFS-Manuskripts — eine Formel auf der Folie und dieselbe im Bericht haben
+    damit dieselbe Form. Vektoren fett und kursiv, das Differential
+    <span class="nowrap">d<i>V</i></span> aufrecht.</p>
+
+  <aside class="notes">
+    Die Nummer ist ein .muted-Absatz im .eq-Raster und steht auf der kleinen
+    Stufe. Passt sie nicht mehr neben die Formel, rueckt sie in die naechste
+    Zeile, statt die Formel zu stauchen.
+  </aside>
+</section>
+
+<!-- ======================================== 6 — Strichdicke & Pfeile ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Strichdicke &amp; Pfeile</h2>
+
+  <div class="striche">
+    <div class="zeile">
+      <span class="probe" style="border-top: 1px solid var(--tud-l1)"></span>
+      <span class="mass"><b>L1</b> · \(1\,\mathrm{px}\)</span>
+      <span class="wo">Linien einer Tabelle — einfache Zeilen und Spalten,
+        nicht die Überschrift; Hilfsgitterlinien in einem Plot</span></div>
+
+    <div class="zeile">
+      <span class="probe" style="border-top: 2px solid var(--tud-l2)"></span>
+      <span class="mass"><b>L2</b> · \(2\,\mathrm{px}\)</span>
+      <span class="wo">Maß- und Hilfslinien einer Skizze; Trennstrich unter
+        der Tabellenüberschrift</span></div>
+
+    <div class="zeile">
+      <span class="probe" style="border-top: 3px solid var(--tud-l3)"></span>
+      <span class="mass"><b>L3</b> · \(3\,\mathrm{px}\)</span>
+      <span class="wo"><b>Die Sache selbst</b>, Vektoren und
+        Einheitsvektoren, die Geometrie einer Skizze, Achsen in einem Plot,
+        Pfeile zu Anmerkungen</span></div>
+  </div>
+
+  <div class="pfeile">
+    <div>
+      <p class="spaltentitel">Anmerkung</p>
+      <svg viewBox="0 0 340 78" role="img"
+           aria-label="Feiner gelber Pfeil, dessen Kopf aus zwei offenen Strichen besteht">
+        <path d="M 16 62 L 322 24" fill="none" stroke="var(--tud-hinweis)" stroke-width="3"/><path d="M 299.34 18.80 L 322 24 L 301.30 34.58" fill="none" stroke="var(--tud-hinweis)" stroke-width="3" stroke-linejoin="miter" stroke-linecap="butt"/>
+      </svg>
+      <p>Offener Kopf aus zwei Strichen, <nobr>Gelb 2</nobr>, \(3\,\mathrm{px}\).</p>
+    </div>
+
+    <div>
+      <p class="spaltentitel">Zeichnung</p>
+      <svg viewBox="0 0 340 78" role="img"
+           aria-label="Feiner grauer Pfeil mit gefülltem, hinten eingezogenem Kopf">
+        <path d="M 16 60 L 323.16 23.30" fill="none" stroke="var(--tud-l3)" stroke-width="3"/><path d="M 334 22 L 313.26 32.49 C 316.64 27.41 315.85 20.84 311.37 16.70 Z" fill="var(--tud-l3)"/>
+      </svg>
+      <p>Gefüllter Kopf mit eingezogenem Rücken, <nobr>Grau 20</nobr>,
+        \(3\,\mathrm{px}\). Kopf \(5.3\times\) breit,
+        \(7.3\times\) lang.</p>
+    </div>
+
+    <div>
+      <p class="spaltentitel">Markierung</p>
+      <svg viewBox="0 0 340 78" role="img"
+           aria-label="Kurzer sehr dicker roter Pfeil mit voll gefülltem Kopf">
+        <path d="M 116 56 L 204.56 34.68" fill="none" stroke="var(--tud-markierung)" stroke-width="20"/><path d="M 224 30 L 190.73 62.70 C 187.45 49.07 182.77 29.66 179.49 16.03 Z" fill="var(--tud-markierung)"/>
+      </svg>
+      <p>Kurz, dick und ganz gefüllt, <nobr>Rot 1.5</nobr>, \(20\,\mathrm{px}\).
+        Kopf \(2.4\times\) breit, \(2.0\times\) lang.</p>
+    </div>
+  </div>
+
+  <aside class="notes">
+    Die Kopfmaße sind Vielfache der Strichstärke, nachgerechnet aus
+    material/arrows.pdf: wer die Linie dicker macht, bekommt die passende
+    Spitze dazu. Anmerkung und Zeichnung stehen auf 3 px, wie die Staffel
+    es sagt; die Markierung bringt ihre 20 px selbst mit und steht ausserhalb.
+
+    Die beiden feinen Pfeile haben dieselbe Spitze -- halber Oeffnungswinkel
+    20 Grad, aus dem gefuellten Kopf gerechnet. Sie unterscheiden sich nur
+    darin, dass der eine offen bleibt und gelb ist.
+
+    Drei Stufen, mehr nicht. Die ersten beiden helfen beim Lesen und stehen
+    deshalb in Grau 40, die dritte trägt, was gelesen werden soll, und steht
+    in Grau 20 — bei einem Pixel Abstand tut die Farbe mehr fürs Auge als die
+    Stärke.
+
+    Die Zeichnungen in S02 folgen der Staffel noch nicht: sie tragen
+    1,13 · 1,2 · 1,6 · 1,8 · 2,6 · 3,13, die Anmerkungspfeile 5,0 und 6,1.
+  </aside>
+</section>
+
+<!-- ===================================================== 7 — Farben ===== -->
+<section>
+  <h2><span class="topic">Stil</span>Farben</h2>
+  <div class="muster einspaltig">
+  <div class="farben">
+    <h3>Farben</h3>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-grau-60);"></span>
+      <span class="cd">Grau 60</span><span class="hex">#7d8894</span>—<span class="wo">L1</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-fg-muted);"></span>
+      <span class="cd">Grau 40</span><span class="hex">#a5aeb8</span><code>--tud-fg-muted</code><span class="wo">Nebenangaben, Rahmen eines Platzhalters, Zitate, L2</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-grau-20);"></span>
+      <span class="cd">Grau 20</span><span class="hex">#d0d5dc</span>—<span class="wo">L3</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-fg);"></span>
+      <span class="cd">Grau 10</span><span class="hex">#e7e9ed</span><code>--tud-fg</code><span class="wo">Fließtext</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-fg-strong);"></span>
+      <span class="cd">Weiß</span><span class="hex">#ffffff</span><code>--tud-fg-strong</code><span class="wo">Folientitel, Autoren</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-accent);"></span>
+      <span class="cd">Blau 2</span><span class="hex">#97c6ff</span><code>--tud-accent</code><span class="wo">Titel</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-accent-2);"></span>
+      <span class="cd">Türkis 2</span><span class="hex">#8ce6d7</span><code>--tud-accent-2</code><span class="wo">Code im Text, Verweis unter dem Zeiger</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-hinweis);"></span>
+      <span class="cd">Gelb 2</span><span class="hex">#ffe483</span><code>--tud-hinweis</code><span class="wo">Hinweispfeile, Datum im Titel</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-markierung);"></span>
+      <span class="cd">Rot 1.5</span><span class="hex">#eb6c72</span><code>--tud-markierung</code><span class="wo">Markierungspfeile</span></div>
+    <div class="zeile"><span class="tupfen" style="background:var(--tud-bg); outline:1px solid var(--tud-l1);"></span>
+      <span class="cd">—</span><span class="hex">#191919</span><code>--tud-bg</code><span class="wo">Grund der Folie</span></div>
+    <p class="fussnote">Jede Farbe hat genau eine Rolle und jede Rolle genau
+      eine Farbe. L1 bis L3 sind die Linienstärken der Folie davor — der Ton
+      wird mit der Stärke heller. Für Legenden in Abbildungen und Plots darf
+      ein Deck eigene Farben vergeben; die stehen dort und nicht hier.</p>
+  </div>
+  </div>
+</section>
+
+<!-- ===================================================== 8 — Tabelle ==== -->
+<section>
+  <h2><span class="topic">Stil</span>Tabelle</h2>
+
+  <table class="grautabelle">
+    <thead>
+      <tr>
+        <th>Baustein</th>
+        <th>Version</th>
+        <th>Lizenz</th>
+        <th class="num">MB</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>reveal.js</td>
+        <td>5.2.1</td>
+        <td>MIT</td>
+        <td class="num">\(5.2\)</td>
+      </tr>
+      <tr>
+        <td>MathJax, TeX nach SVG</td>
+        <td>3.2.2</td>
+        <td>Apache-2.0</td>
+        <td class="num">\(2.2\)</td>
+      </tr>
+      <tr>
+        <td>MathJax mit STIX Two Math</td>
+        <td>4.1.3</td>
+        <td>Apache-2.0</td>
+        <td class="num">\(1.6\)</td>
+      </tr>
+      <tr>
+        <td>Noto Sans TUD</td>
+        <td>6 Schnitte</td>
+        <td>OFL 1.1</td>
+        <td class="num">\(0.3\)</td>
+      </tr>
+      <tr>
+        <td>TUD-Wortmarken, ISM-Logo</td>
+        <td>CD 2025</td>
+        <td>TUD</td>
+        <td class="num">\(0.1\)</td>
+      </tr>
+      <tr>
+        <td>tud-slides.js, shared_data</td>
+        <td>—</td>
+        <td>—</td>
+        <td class="num">\(0.1\)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="fussnote mittig">Alles liegt im Repository, nichts wird zur
+    Laufzeit geholt: ein Foliensatz läuft im Hörsaal, im Flugzeug und an einem
+    Beamer ohne Netz. Die Größen sind auf der Platte gemessen, ungepackt.</p>
+
+  <aside class="notes">
+    Die Tabelle zeigt, was das Theme an einer Tabelle setzt: Kopfzeile in
+    Blau 2, Zeilenlinien in Grau 80, letzte Zeile ohne Linie, und .num für
+    Zahlenspalten mit Tabellenziffern. S02 stellt die Kopflinie deck-lokal auf
+    dasselbe Grau wie die Zeilenlinien um — das ist dort eine Entscheidung
+    dieses Vortrags und nicht der Stil.
+  </aside>
+</section>
+
+
+
+
+
+<!-- ============================================== 9 — Bild & Video ===== -->
+<!-- Diese Folie zeigt ihr Mass nicht, sie hat es: der Kasten ist der Platz,
+     von dem er spricht. data-layout="fill" gibt ihm, was unter dem
+     Folientitel uebrig bleibt -- genau die 1136 x 480, die dort stehen. Wer
+     den Titel laenger macht oder eine Zeile Vorspann einfuegt, sieht die Zahl
+     nicht mehr stimmen; sie wird von Hand gesetzt und nicht gemessen. -->
+<section data-layout="fill">
+  <h2><span class="topic">Stil</span>Bild und Video</h2>
+
+  <div class="massflaeche">
+    <p class="gross">\(1136 \times 480\,\mathrm{px}\)</p>
+    <p class="wo">So groß darf ein Bild oder ein Video auf einer Folie mit
+      Titel höchstens sein. Dieser Kasten ist es.</p>
+  </div>
+
+  <aside class="notes">
+    Mit einzeiliger Bildunterschrift bleiben 1136 × 444, mit zweizeiliger
+    1136 × 418. Ohne Titel und ohne Rand — class="fill" — geht die ganze
+    Folie, 1280 × 720. Alles im Browser gemessen.
+
+    Was groesser ist, rechnet object-fit: contain still herunter. Die
+    Aufloesung der Datei darf groesser sein, die Bildflaeche nicht.
+  </aside>
+</section>
+
+
+
+
+</div>
+</div>
+
+<script src="reveal/dist/reveal.js"></script>
+<script src="reveal/plugin/notes/notes.js"></script>
+<script src="reveal/plugin/search/search.js"></script>
+<script src="reveal/plugin/zoom/zoom.js"></script>
+<script src="reveal/plugin/math/math.js"></script>
+<script src="lib/shared_data.js"></script>
+<script src="lib/tud-slides.js"></script>
+
+<script>
+  TUD.init({
+    language: 'de',
+    assets: '.',
+    /* Dasselbe Buendel wie S02: MathJax 4 mit STIX Two Math fest eingebaut,
+       der Matheschrift des PEFS-Manuskripts. Der Stil soll eine Matheschrift
+       zeigen und nicht zwei -- die Vorgabe der Laufzeit ist noch MathJax 3
+       mit seiner Computer-Modern-Variante.
+
+       boldsymbol und html muessen von Hand geladen werden, ams nicht: was im
+       Buendel steckt, wird daneben gesucht und nicht gefunden, und MathJax
+       startet dann nicht fertig. Siehe lib/mathjax/VERSION. */
+    reveal: {
+      mathjax3: {
+        mathjax: 'lib/mathjax/tex-mml-svg-mathjax-stix2.js',
+        loader: { load: ['[tex]/boldsymbol', '[tex]/html'] }
+      }
+    }
+  });
+</script>
+</body>
+</html>
